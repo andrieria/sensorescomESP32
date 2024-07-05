@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Data from ESP32</h1>
+
+    <div id="gps-info">
+        <h2>GPS Data</h2>
+        <p id="latitude">Latitude: N/A</p>
+        <p id="longitude">Longitude: N/A</p>
+        <p id="altitude">Altitude: N/A</p>
+        <p id="address">Address: N/A</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="charts">
+        <h2>Temperature and Humidity Charts</h2>
+        <img id="temperature-chart" src="" alt="Temperature Chart">
+        <img id="humidity-chart" src="" alt="Humidity Chart">
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        var map = L.map('map').setView([0, 0], 2);  // Inicializa o mapa
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var marker;
+
+        socket.on('update_data', function(data) {
+            console.log(data); // Log para verificar os dados recebidos
+            document.getElementById('latitude').textContent = 'Latitude: ' + data.latitude;
+            document.getElementById('longitude').textContent = 'Longitude: ' + data.longitude;
+            document.getElementById('altitude').textContent = 'Altitude: ' + data.altitude;
+            document.getElementById('address').textContent = 'Address: ' + data.address;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([data.latitude, data.longitude]).addTo(map)
+                .bindPopup(data.address)
+                .openPopup();
+            map.setView([data.latitude, data.longitude], 15);
+        });
+
+        socket.on('update_chart', function(data) {
+            document.getElementById('temperature-chart').src = 'data:image/png;base64,' + data.temperature_chart;
+            document.getElementById('humidity-chart').src = 'data:image/png;base64,' + data.humidity_chart;
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Data from ESP32</h1>
+
+    <div id="gps-info">
+        <h2>GPS Data</h2>
+        <p id="latitude">Latitude: N/A</p>
+        <p id="longitude">Longitude: N/A</p>
+        <p id="altitude">Altitude: N/A</p>
+        <p id="address">Address: N/A</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="charts">
+        <h2>Temperature and Humidity Charts</h2>
+        <img id="temperature-chart" src="" alt="Temperature Chart">
+        <img id="humidity-chart" src="" alt="Humidity Chart">
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        var map = L.map('map').setView([0, 0], 2);  // Inicializa o mapa
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var marker;
+
+        socket.on('update_data', function(data) {
+            document.getElementById('latitude').textContent = 'Latitude: ' + data.latitude;
+            document.getElementById('longitude').textContent = 'Longitude: ' + data.longitude;
+            document.getElementById('altitude').textContent = 'Altitude: ' + data.altitude;
+            document.getElementById('address').textContent = 'Address: ' + data.address;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([data.latitude, data.longitude]).addTo(map)
+                .bindPopup(data.address)
+                .openPopup();
+            map.setView([data.latitude, data.longitude], 15);
+        });
+
+        socket.on('update_chart', function(data) {
+            document.getElementById('temperature-chart').src = 'data:image/png;base64,' + data.temperature_chart;
+            document.getElementById('humidity-chart').src = 'data:image/png;base64,' + data.humidity_chart;
+        });
+    </script>
+</body>
+</html>
+-->
+
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Data from ESP32</h1>
+
+    <div id="gps-info">
+        <h2>GPS Data</h2>
+        <p id="latitude">Latitude: N/A</p>
+        <p id="longitude">Longitude: N/A</p>
+        <p id="altitude">Altitude: N/A</p>
+        <p id="address">Address: N/A</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="charts">
+        <h2>Temperature and Humidity Charts</h2>
+        <img id="temperature-chart" src="" alt="Temperature Chart">
+        <img id="humidity-chart" src="" alt="Humidity Chart">
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        var map = L.map('map').setView([0, 0], 2);  // Inicializa o mapa
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var marker;
+
+        socket.on('update_data', function(data) {
+            document.getElementById('latitude').textContent = 'Latitude: ' + data.latitude;
+            document.getElementById('longitude').textContent = 'Longitude: ' + data.longitude;
+            document.getElementById('altitude').textContent = 'Altitude: ' + data.altitude;
+            document.getElementById('address').textContent = 'Address: ' + data.address;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([data.latitude, data.longitude]).addTo(map)
+                .bindPopup(data.address)
+                .openPopup();
+            map.setView([data.latitude, data.longitude], 15);
+        });
+
+        socket.on('update_chart', function(data) {
+            document.getElementById('temperature-chart').src = 'data:image/png;base64,' + data.temperature_chart;
+            document.getElementById('humidity-chart').src = 'data:image/png;base64,' + data.humidity_chart;
+        });
+    </script>
+</body>
+</html>
+-->
+
+
+
+<!--
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <style>
+        #chart {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Data</h1>
+    <img id="chart" src="" alt="Real-time chart">
+    <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('update_data', function(data) {
+            console.log('Temperature:', data.temperature, 'Humidity:', data.humidity);
+        });
+
+        socket.on('update_chart', function(data) {
+            var img = document.getElementById('chart');
+            img.src = 'data:image/png;base64,' + data.image;
+        });
+    </script>
+</body>
+</html>-->
