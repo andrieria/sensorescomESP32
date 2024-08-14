@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cube</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #282c34; }
+        .cube { width: 100px; height: 100px; position: relative; transform-style: preserve-3d; transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); transition: transform 0.1s; }
+        .cube div { position: absolute; width: 100px; height: 100px; background: rgba(255, 255, 255, 0.8); border: 1px solid #ccc; }
+        .front  { transform: translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+    </style>
+</head>
+<body>
+    <div class="cube">
+        <div class="front"></div>
+        <div class="back"></div>
+        <div class="left"></div>
+        <div class="right"></div>
+        <div class="top"></div>
+        <div class="bottom"></div>
+    </div>
+    <script>
+        const cube = document.querySelector('.cube');
+
+        async function updateCube() {
+            const response = await fetch('/sensor_data');
+            const data = await response.json();
+
+            const { X, Y, Z } = data;
+            cube.style.transform = `rotateX(${X}deg) rotateY(${Y}deg) rotateZ(${Z}deg)`;
+        }
+
+        setInterval(updateCube, 100);
+    </script>
+</body>
+</html>

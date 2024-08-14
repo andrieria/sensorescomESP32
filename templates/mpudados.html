@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPU6050 Real-time Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #111;
+            color: #fff;
+        }
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+        h1 {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>MPU6050 Real-time Visualization</h1>
+    <div id="container"></div>
+
+    <script>
+        const container = document.getElementById('container');
+
+        // Set up the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        // Add lighting to the scene
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambientLight);
+
+        const pointLight1 = new THREE.PointLight(0xffffff, 1);
+        pointLight1.position.set(10, 10, 10);
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0xffffff, 1);
+        pointLight2.position.set(-10, -10, -10);
+        scene.add(pointLight2);
+
+        // Create a cube with a realistic material
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, roughness: 0.5, metalness: 0.5 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        // Adjust the renderer and camera on window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Connect to WebSocket
+        const socket = io();
+
+        // Update cube rotation based on sensor data
+        socket.on('new_data', function(data) {
+            const gx = parseFloat(data.gx);
+            const gy = parseFloat(data.gy);
+            const gz = parseFloat(data.gz);
+
+            cube.rotation.x = gx * Math.PI / 180;
+            cube.rotation.y = gy * Math.PI / 180;
+            cube.rotation.z = gz * Math.PI / 180;
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPU6050 Real-time Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>MPU6050 Real-time Visualization</h1>
+    <div id="container"></div>
+
+    <script>
+        const container = document.getElementById('container');
+
+        // Set up the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        // Add lighting to the scene
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+
+        // Create a cube with more realistic material
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Connect to WebSocket
+        const socket = io();
+
+        // Update cube rotation based on sensor data
+        socket.on('new_data', function(data) {
+            const gx = parseFloat(data.gx);
+            const gy = parseFloat(data.gy);
+            const gz = parseFloat(data.gz);
+
+            cube.rotation.x = gx * Math.PI / 180;
+            cube.rotation.y = gy * Math.PI / 180;
+            cube.rotation.z = gz * Math.PI / 180;
+        });
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPU6050 Real-time Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>MPU6050 Real-time Visualization</h1>
+    <div id="container"></div>
+
+    <script>
+        const container = document.getElementById('container');
+
+        // Set up the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        // Create a cube
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Connect to WebSocket
+        const socket = io();
+
+        // Update cube rotation based on sensor data
+        socket.on('new_data', function(data) {
+            const gx = parseFloat(data.gx);
+            const gy = parseFloat(data.gy);
+            const gz = parseFloat(data.gz);
+
+            cube.rotation.x = gx * Math.PI / 180;
+            cube.rotation.y = gy * Math.PI / 180;
+            cube.rotation.z = gz * Math.PI / 180;
+        });
+    </script>
+</body>
+</html>

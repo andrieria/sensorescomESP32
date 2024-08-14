@@ -14,7 +14,7 @@ HardwareSerial gpsSerial(2);  // Cria uma instância de HardwareSerial para o GP
 
 const char* ssid = "andrieriawifi";
 const char* password = "dridrigata";
-const char* serverName = "http://192.168.176.10:5000";
+const char* serverName = "http://192.168.4.251:5000";
 
 void setup() {
   // Inicializa a porta serial do GPS

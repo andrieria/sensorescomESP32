@@ -52,7 +52,7 @@ def receive_data():
 @app.route('/', methods=['GET'])
 def index():
     # Renderiza o template HTML que contém o mapa e os gráficos
-    return render_template('index.html')
+    return render_template('index2.html')
 
 '''def generate_map(address):
     # Função para gerar e retornar o mapa utilizando folium e os dados de GPS
@@ -65,7 +65,7 @@ def generate_chart():
     while True:
         with thread_lock:
             if temperatura and umidade:
-                plt.figure(figsize=(10, 5))
+                #plt.figure(figsize=(10, 5))
                 plt.subplot(1, 2, 1)
                 plt.plot(temperatura, label='Temperatura')
                 plt.xlabel('Tempo (s)')
@@ -88,7 +88,7 @@ def generate_chart():
                 plt.ylabel('Umidade (%)')
                 plt.ylim(0, 100)
                 plt.legend()
-
+ 
                 # Convertendo o gráfico para uma imagem base64 para enviar para o cliente
                 buf = io.BytesIO()
                 plt.savefig(buf, format='png')
