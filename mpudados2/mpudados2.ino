@@ -36,7 +36,14 @@ void setup() {
   mpu.initialize();
 }
 
-c
+void loop() {
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  data.X = map(ax, -17000, 17000, 0, 2000); 
+  data.Y = map(ay, -17000, 17000, 0, 2000); 
+  data.Z = map(az, -17000, 17000, 0, 2000); 
+  data.Gx = map(gx, -17000, 17000, 0, 2000); 
+  data.Gy = map(gy, -17000, 17000, 0, 2000); 
+  data.Gz = map(gz, -17000, 17000, 0, 2000);
 
   if(WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
@@ -59,5 +66,5 @@ c
     }
     http.end();
   }
-  delay(500);
+  delay(100);
 }

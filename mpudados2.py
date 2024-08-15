@@ -14,6 +14,7 @@ def receive_data():
     sensor_data['Gx'] = request.form['Gx']
     sensor_data['Gy'] = request.form['Gy']
     sensor_data['Gz'] = request.form['Gz']
+    print(sensor_data)
     return jsonify(sensor_data)
 
 @app.route('/')
@@ -25,4 +26,4 @@ def get_sensor_data():
     return jsonify(sensor_data)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')
