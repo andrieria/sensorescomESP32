@@ -9,13 +9,16 @@ from geopy.geocoders import Nominatim
 app = Flask(__name__)
 socketio = SocketIO(app)
 temperatura = []
-umidade = [] 
+umidade = []
 latitude = 0.0
 longitude = 0.0
 altitude = 0.0
 velocidade = 0.0
 satelites = 0.0
 precisao = 0.0
+ssid = ""
+ip = ""
+rssi = ""
 thread = None
 thread_lock = Lock()
 
@@ -23,7 +26,9 @@ geolocator = Nominatim(user_agent="gps_app")
 
 @app.route('/', methods=['POST'])
 def receive_data():
-    global latitude, longitude, altitude, velocidade, satelites, precisao
+    global latitude, longitude, altitude, velocidade, satelites, precisao, ssid, ip, rssi
+    
+
 
     temperature = request.form['temperature']
     humidity = request.form['humidity']
@@ -33,26 +38,53 @@ def receive_data():
     velocidade = float(request.form['velocidade'])
     satelites = float(request.form['satelites'])
     precisao = float(request.form['precisao'])
-
-    temperatura.append(float(temperature))
-    umidade.append(float(humidity))
-
-    location = geolocator.reverse(f"{latitude}, {longitude}")
-
-    address = location.address
-    print("Endereço completo:", address)
-
+    ssid = request.form['ssid']
+    ip = request.form['ip']
+    rssi = request.form['rssi']
     
-    socketio.emit('update_data', {'temperature': temperature, 'humidity': humidity, 'latitude': latitude, 'longitude': longitude, 'altitude': altitude, 'velocidade': velocidade, 'satelites': satelites, 'precisao': precisao, 'address': address})
+    print(f"Latitude: {latitude}, Longitude: {longitude}, Altitude: {altitude}")
+    print(f"Temperatura: {temperature}, Umidade: {humidity}")
+    print(f"Velocidade: {velocidade}, Satélites: {satelites}, Precisão: {precisao}")
+    print(f"SSID: {ssid}, IP: {ip}, RSSI: {rssi}")
+    
+    if latitude != 0 and longitude != 0 and altitude != 0:
+         
+        print("Entrando no if")
+        temperatura.append(float(temperature))
+        umidade.append(float(humidity))
+
+        '''location = geolocator.reverse(f"{latitude}, {longitude}")
+
+        address = location.address
+        print("Endereço completo:", address)'''
+        location = geolocator.reverse(f"{latitude}, {longitude}")
+        address = "N/A"  # Valor padrão caso o endereço não seja encontrado
+
+        if location:
+            address = location.address
+            print("Endereço completo:", address)
+        else:
+            print("Endereço não encontrado.")
+
+
+        
+        socketio.emit('update_data', {'temperature': temperature, 'humidity': humidity, 'latitude': latitude, 'longitude': longitude, 'altitude': altitude, 'velocidade': velocidade, 'satelites': satelites, 'precisao': precisao, 'address': address, 'ssid': ssid, 'ip': ip, 'rssi': rssi})
     #socketio.emit('update_data', {'temperature': temperature, 'humidity': humidity, 'location': address})
     #socketio.emit('update_map', {'map': generate_map(address)})  # Atualiza o mapa com a nova localização
 
+    else:
+        print("Entrando no else")
+        temperatura.append(float(temperature))
+        umidade.append(float(humidity))
+        
+        socketio.emit('update_data', {'temperature': temperature, 'humidity': humidity, 'latitude': 'N/A', 'longitude': 'N/A', 'altitude': 'N/A', 'velocidade': 'N/A', 'satelites': 'N/A', 'precisao': 'N/A', 'address': 'N/A', 'ssid': ssid, 'ip': ip, 'rssi': rssi})
+        
     return 'Data received', 200
 
 @app.route('/', methods=['GET'])
 def index():
     # Renderiza o template HTML que contém o mapa e os gráficos
-    return render_template('index2.html')
+    return render_template('index.html')
 
 '''def generate_map(address):
     # Função para gerar e retornar o mapa utilizando folium e os dados de GPS
@@ -66,11 +98,8 @@ def generate_chart():
         with thread_lock:
             if temperatura and umidade:
                 plt.figure(figsize=(10, 5))
-                
-                #plt.clf()
-                
                 plt.subplot(1, 2, 1)
-                plt.plot(temperatura, label='Temperatura', color='red')
+                plt.plot(temperatura, label='Temperatura')
                 plt.xlabel('Tempo (s)')
                 plt.xlim(0, 60)
                 plt.ylabel('Temperatura (°C)')
@@ -78,39 +107,28 @@ def generate_chart():
                 plt.legend()
                 
                 
-                '''buf = io.BytesIO()
+                buf = io.BytesIO()
                 plt.savefig(buf, format='png')
                 buf.seek(0)
                 temp_chart_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
                 buf.close()
-                plt.clf()'''
-                
-                #socketio.emit('update_chart', {'temperature_chart': temp_chart_base64})
-                
-                #plt.figure(figsize=(10, 5))
+
                 plt.subplot(1, 2, 2)
-                plt.plot(umidade, label='Umidade', color='blue')
+                plt.plot(umidade, label='Umidade')
                 plt.xlabel('Tempo (s)')
                 plt.xlim(0, 60)
                 plt.ylabel('Umidade (%)')
                 plt.ylim(0, 100)
                 plt.legend()
- 
+
                 # Convertendo o gráfico para uma imagem base64 para enviar para o cliente
                 buf = io.BytesIO()
                 plt.savefig(buf, format='png')
                 buf.seek(0)
-                #hum_chart_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-                chart_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+                hum_chart_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
                 buf.close()
-                #plt.clf()  # Limpa a figura para evitar qualquer resíduo
-
-                # Emite o gráfico de umidade para o cliente
-                #socketio.emit('update_chart', {'humidity_chart': hum_chart_base64})
-                plt.close()
-                socketio.emit('update_chart', {'chart': chart_base64})
-                #socketio.emit('update_chart', {'temperature_chart': chart_base64, 'humidity_chart': chart_base64})
-                #socketio.emit('update_chart', {'temperature_chart': temp_chart_base64, 'humidity_chart': hum_chart_base64})
+                
+                socketio.emit('update_chart', {'temperature_chart': temp_chart_base64, 'humidity_chart': hum_chart_base64})
                 #socketio.emit('update_chart', {'temperature_chart': image_base64, 'humidity_chart': image_base64})
 
         socketio.sleep(1)
@@ -124,4 +142,4 @@ def handle_connect():
             thread = socketio.start_background_task(target=generate_chart)
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caravana Espacial - CubeSat Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f0f5;
+            color: #333;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .container {
+            padding: 20px;
+        }
+        .info-section, .chart-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Caravana Espacial - CubeSat Real-Time Data</h1>
+    </header>
+    <div class="container">
+        <div class="info-section" id="gps-info">
+            <h2>Telemetria do CaravanaSat</h2>
+            <p id="ssid">Identificação da Rede Sem Fio: N/A</p>
+            <p id="ip">Endereço IP: N/A</p>
+            <p id="rssi">Intensidade do sinal (RSSI): N/A</p>
+            <p id="latitude">Latitude: N/A</p>
+            <p id="longitude">Longitude: N/A</p>
+            <p id="altitude">Altitude: N/A</p>
+            <p id="velocidade">Velocidade: N/A</p>
+            <p id="satelites">Satélites: N/A</p>
+            <p id="precisao">HDOP (Precisão): N/A</p>
+            <p id="address">Endereço: N/A</p>
+        </div>
+        <div id="map"></div>
+        <div class="chart-section" id="charts">
+            <h2>Gráfico de Temperatura e Umidade</h2>
+            <img id="combined-chart" src="" alt="Temperature and Humidity Chart">  
+        </div>
+    </div>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Initialize the map
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var marker;
+
+        socket.on('update_data', function(data) {
+            console.log(data);
+            document.getElementById('latitude').textContent = 'Latitude: ' + data.latitude;
+            document.getElementById('longitude').textContent = 'Longitude: ' + data.longitude;
+            document.getElementById('altitude').textContent = 'Altitude: ' + data.altitude;
+            document.getElementById('velocidade').textContent = 'Velocidade: ' + data.velocidade;
+            document.getElementById('satelites').textContent = 'Satélites: ' + data.satelites;
+            document.getElementById('precisao').textContent = 'HDOP (Precisão): ' + data.precisao;
+            document.getElementById('address').textContent = 'Endereço: ' + data.address;
+            document.getElementById('ssid').textContent = 'Identificação da Rede Sem Fio: ' + data.ssid;
+            document.getElementById('ip').textContent = 'Endereço IP: ' + data.ip;
+            document.getElementById('rssi').textContent = 'Intensidade do sinal (RSSI): ' + data.rssi;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([data.latitude, data.longitude]).addTo(map)
+                .bindPopup(data.address)
+                .openPopup();
+            map.setView([data.latitude, data.longitude], 15);
+        });
+
+        socket.on('update_chart', function(data) {
+            document.getElementById('combined-chart').src = 'data:image/png;base64,' + data.chart;
+        });
+    </script>
+</body>
+</html>

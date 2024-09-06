@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caravana Espacial - CubeSat Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f5;
+            color: #333;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .info-section, .chart-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Caravana Espacial - CubeSat Real-Time Data</h1>
+    </header>
+    <div class="container">
+        <div class="info-section" id="gps-info">
+            <h2>GPS Data</h2>
+            <p id="latitude">Latitude: N/A</p>
+            <p id="longitude">Longitude: N/A</p>
+            <p id="altitude">Altitude: N/A</p>
+            <p id="velocidade">Velocidade: N/A</p>
+            <p id="satelites">Satélites: N/A</p>
+            <p id="precisao">HDOP (Precisão): N/A</p>
+            <p id="address">Endereço: N/A</p>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="chart-section">
+            <h2>Gráficos de Sensores</h2>
+            <!-- Gráfico de Temperatura -->
+            <div class="chart-container">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+            <!-- Gráfico de Umidade -->
+            <div class="chart-container">
+                <canvas id="humidityChart"></canvas>
+            </div>
+            <!-- Gráficos de Acelerômetro -->
+            <div class="chart-container">
+                <canvas id="accChart"></canvas>
+            </div>
+            <!-- Gráficos de Giroscópio -->
+            <div class="chart-container">
+                <canvas id="gyroChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Mapa
+        var map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        var marker;
+
+        // Atualização de dados GPS
+        socket.on('update_data', function(data) {
+            document.getElementById('latitude').textContent = 'Latitude: ' + data.latitude;
+            document.getElementById('longitude').textContent = 'Longitude: ' + data.longitude;
+            document.getElementById('altitude').textContent = 'Altitude: ' + data.altitude + ' m';
+            document.getElementById('velocidade').textContent = 'Velocidade: ' + data.velocidade + ' m/s';
+            document.getElementById('satelites').textContent = 'Satélites: ' + data.satelites;
+            document.getElementById('precisao').textContent = 'HDOP (Precisão): ' + data.precisao;
+            document.getElementById('address').textContent = 'Endereço: ' + data.address;
+
+            if (!marker) {
+                marker = L.marker([data.latitude, data.longitude]).addTo(map);
+            } else {
+                marker.setLatLng([data.latitude, data.longitude]);
+            }
+            map.setView([data.latitude, data.longitude], 13);
+        });
+
+        // Configuração dos gráficos
+        var temperatureChartCtx = document.getElementById('temperatureChart').getContext('2d');
+        var humidityChartCtx = document.getElementById('humidityChart').getContext('2d');
+        var accChartCtx = document.getElementById('accChart').getContext('2d');
+        var gyroChartCtx = document.getElementById('gyroChart').getContext('2d');
+
+        var temperatureChart = new Chart(temperatureChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Temperatura (°C)',
+                    data: [],
+                    borderColor: 'red',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 50
+                    }
+                }
+            }
+        });
+
+        var humidityChart = new Chart(humidityChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Umidade (%)',
+                    data: [],
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        var accChart = new Chart(accChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Acelerômetro X',
+                    data: [],
+                    borderColor: 'green',
+                    fill: false
+                }, {
+                    label: 'Acelerômetro Y',
+                    data: [],
+                    borderColor: 'orange',
+                    fill: false
+                }, {
+                    label: 'Acelerômetro Z',
+                    data: [],
+                    borderColor: 'purple',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        var gyroChart = new Chart(gyroChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Giroscópio X',
+                    data: [],
+                    borderColor: 'pink',
+                    fill: false
+                }, {
+                    label: 'Giroscópio Y',
+                    data: [],
+                    borderColor: 'yellow',
+                    fill: false
+                }, {
+                    label: 'Giroscópio Z',
+                    data: [],
+                    borderColor: 'brown',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Atualização dos gráficos
+        socket.on('update_chart', function(data) {
+            var chartData = data.chart;
+            var temperature = parseFloat(data.temperature);
+            var humidity = parseFloat(data.humidity);
+
+            // Adiciona os novos dados aos gráficos
+            temperatureChart.data.labels.push('');
+            temperatureChart.data.datasets[0].data.push(temperature);
+            temperatureChart.update();
+
+            humidityChart.data.labels.push('');
+            humidityChart.data.datasets[0].data.push(humidity);
+            humidityChart.update();
+
+            accChart.data.labels.push('');
+            accChart.data.datasets[0].data.push(data.ax);
+            accChart.data.datasets[1].data.push(data.ay);
+            accChart.data.datasets[2].data.push(data.az);
+            accChart.update();
+
+            gyroChart.data.labels.push('');
+            gyroChart.data.datasets[0].data.push(data.gx);
+            gyroChart.data.datasets[1].data.push(data.gy);
+            gyroChart.data.datasets[2].data.push(data.gz);
+            gyroChart.update();
+        });
+    </script>
+</body>
+</html>

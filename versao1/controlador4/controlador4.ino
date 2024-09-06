@@ -18,26 +18,18 @@ const char* serverName = "http://192.168.132.251:5000";
 IPAddress ip; 
 
 void setup() {
-  // Inicializa a porta serial do GPS
-  //Serial.begin(9600);
-
   gpsSerial.begin(9600, SERIAL_8N1, RX_PIN, TX_PIN);
-
   dht.begin();
   
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-    //Serial.println(WiFi.status());
-    delay(1000);
-    // Tentando conectar ao WiFi
+    delay(1000);  // Tentando conectar ao WiFi
   }
 }
 
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
-    //Serial.println(WiFi.localIP());
-    
     HTTPClient http;
     http.begin(serverName);
     String ssid = WiFi.SSID();
@@ -52,7 +44,23 @@ void loop() {
       return;
     }
 
-    // Ler dados do GPS
+    // Variáveis padrão para os dados do GPS
+    /*String latitude = "N/A";
+    String longitude = "N/A";
+    String altitude = "N/A";
+    String velocidade = "N/A";
+    String satelites = "N/A";
+    String precisao = "N/A";*/
+
+    float latitude = 0;
+    float altitude = 0;
+    float longitude = 0;
+    float velocidade = 0;
+    float satelites = 0;
+    float precisao = 0;
+
+
+    // Ler dados do GPS se disponíveis
     while (gpsSerial.available() > 0) {
       if (gps.encode(gpsSerial.read())) {
         if (gps.location.isValid()) {
@@ -62,33 +70,34 @@ void loop() {
           float velocidade = gps.speed.mps();
           float satelites = gps.satellites.value();
           float precisao = gps.hdop.value();
-
-          String httpRequestData = "temperature=" + String(t) + "&humidity=" + String(h) +
-                                   "&latitude=" + String(latitude, 6) +
-                                   "&longitude=" + String(longitude, 6) +
-                                   "&altitude=" + String(altitude, 2) + 
-                                   "&velocidade=" + String(velocidade, 3) +
-                                   "&satelites=" + String(satelites, 5) +
-                                   "&precisao=" + String(precisao, 6) +
-                                   "&ssid=" + ssid + 
-                                   "&ip=" + String(ip, 15) +
-                                   "&rssi=" + String(rssi, 4);
-
-          http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-          int httpResponseCode = http.POST(httpRequestData);
-          
-          if (httpResponseCode <= 0) {
-            // Erro ao enviar POST
-          }
-          
-          http.end();
         }
       }
     }
+
+    // Criar a string httpRequestData com os dados disponíveis
+    String httpRequestData = "temperature=" + String(t) + "&humidity=" + String(h) +
+                             "&latitude=" + latitude +
+                             "&longitude=" + longitude +
+                             "&altitude=" + altitude + 
+                             "&velocidade=" + velocidade +
+                             "&satelites=" + satelites +
+                             "&precisao=" + precisao +
+                             "&ssid=" + ssid + 
+                             "&ip=" + String(ip, 15) +
+                             "&rssi=" + String(rssi, 4);
+
+    // Enviar a requisição
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    int httpResponseCode = http.POST(httpRequestData);
+
+    if (httpResponseCode <= 0) {
+      // Erro ao enviar POST
+    }
+
+    http.end();
   } else {
     // WiFi Desconectado
-    //Serial.println("Desconectado.");
   }
   
   delay(1000);

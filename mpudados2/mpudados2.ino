@@ -4,8 +4,8 @@
 #include "I2Cdev.h"     
 #include "MPU6050.h"    
 
-const char* ssid = "andrieriawifi";
-const char* password = "dridrigata";
+const char* ssid = "JardimTelecom- Adilson_5G";
+const char* password = "adoliveira";
 const char* serverName = "http://192.168.211.251:5000"; // IP do servidor Flask
 
 MPU6050 mpu;

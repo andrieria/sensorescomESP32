@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CubeSat Sensor Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f5;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CubeSat Sensor Data</h1>
+    <div class="chart-container">
+        <canvas id="accelChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="gyroChart"></canvas>
+    </div>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        var accelChartCtx = document.getElementById('accelChart').getContext('2d');
+        var gyroChartCtx = document.getElementById('gyroChart').getContext('2d');
+
+        var accelChart = new Chart(accelChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Accel X', data: [], borderColor: 'rgba(255, 99, 132, 1)', fill: false },
+                    { label: 'Accel Y', data: [], borderColor: 'rgba(54, 162, 235, 1)', fill: false },
+                    { label: 'Accel Z', data: [], borderColor: 'rgba(75, 192, 192, 1)', fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { type: 'time', time: { unit: 'second' } },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        var gyroChart = new Chart(gyroChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Gyro X', data: [], borderColor: 'rgba(153, 102, 255, 1)', fill: false },
+                    { label: 'Gyro Y', data: [], borderColor: 'rgba(255, 159, 64, 1)', fill: false },
+                    { label: 'Gyro Z', data: [], borderColor: 'rgba(255, 205, 86, 1)', fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { type: 'time', time: { unit: 'second' } },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        socket.on('sensor_data', function(data) {
+            var now = new Date();
+            accelChart.data.labels.push(now);
+            gyroChart.data.labels.push(now);
+
+            accelChart.data.datasets[0].data.push(data.accel_x);
+            accelChart.data.datasets[1].data.push(data.accel_y);
+            accelChart.data.datasets[2].data.push(data.accel_z);
+
+            gyroChart.data.datasets[0].data.push(data.gyro_x);
+            gyroChart.data.datasets[1].data.push(data.gyro_y);
+            gyroChart.data.datasets[2].data.push(data.gyro_z);
+
+            accelChart.update();
+            gyroChart.update();
+        });
+    </script>
+</body>
+</html>

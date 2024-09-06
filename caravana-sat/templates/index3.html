@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados do Sensor</title>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.0.1/dist/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #data { margin: 20px; }
+        #charts { margin: 20px; }
+        .chart-container { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div id="data">
+        <h1>Dados do Sensor</h1>
+        <p>Temperatura: <span id="temperature">N/A</span> °C</p>
+        <p>Umidade: <span id="humidity">N/A</span> %</p>
+        <p>Latitude: <span id="latitude">N/A</span></p>
+        <p>Longitude: <span id="longitude">N/A</span></p>
+        <p>Altitude: <span id="altitude">N/A</span> m</p>
+        <p>Velocidade: <span id="velocidade">N/A</span> m/s</p>
+        <p>Satelites: <span id="satelites">N/A</span></p>
+        <p>Precisão: <span id="precisao">N/A</span></p>
+        <p>Endereço: <span id="address">N/A</span></p>
+        <p>SSID: <span id="ssid">N/A</span></p>
+        <p>IP: <span id="ip">N/A</span></p>
+        <p>RSSI: <span id="rssi">N/A</span></p>
+    </div>
+    <div id="charts">
+        <h1>Gráficos</h1>
+        <div id="charts-container" class="chart-container">
+            <img id="chart" src="" alt="Gráfico">
+        </div>
+        <div id="accelerometer-container" class="chart-container">
+            <h2>Acelerômetro</h2>
+            <p>X: <span id="acc_x">N/A</span></p>
+            <p>Y: <span id="acc_y">N/A</span></p>
+            <p>Z: <span id="acc_z">N/A</span></p>
+        </div>
+        <div id="gyroscope-container" class="chart-container">
+            <h2>Giroscópio</h2>
+            <p>X: <span id="gyro_x">N/A</span></p>
+            <p>Y: <span id="gyro_y">N/A</span></p>
+            <p>Z: <span id="gyro_z">N/A</span></p>
+        </div>
+    </div>
+    <script>
+        var socket = io();
+
+        socket.on('update_data', function(data) {
+            document.getElementById('temperature').textContent = data.temperature;
+            document.getElementById('humidity').textContent = data.humidity;
+            document.getElementById('latitude').textContent = data.latitude;
+            document.getElementById('longitude').textContent = data.longitude;
+            document.getElementById('altitude').textContent = data.altitude;
+            document.getElementById('velocidade').textContent = data.velocidade;
+            document.getElementById('satelites').textContent = data.satelites;
+            document.getElementById('precisao').textContent = data.precisao;
+            document.getElementById('address').textContent = data.address;
+            document.getElementById('ssid').textContent = data.ssid;
+            document.getElementById('ip').textContent = data.ip;
+            document.getElementById('rssi').textContent = data.rssi;
+        });
+
+        socket.on('update_chart', function(data) {
+            document.getElementById('chart').src = 'data:image/png;base64,' + data.chart;
+        });
+
+        // Caso queira também atualizar os dados dos acelerômetros e giroscópios especificamente
+        socket.on('update_acc_gyro', function(data) {
+            document.getElementById('acc_x').textContent = data.acc_x;
+            document.getElementById('acc_y').textContent = data.acc_y;
+            document.getElementById('acc_z').textContent = data.acc_z;
+            document.getElementById('gyro_x').textContent = data.gyro_x;
+            document.getElementById('gyro_y').textContent = data.gyro_y;
+            document.getElementById('gyro_z').textContent = data.gyro_z;
+        });
+    </script>
+</body>
+</html>

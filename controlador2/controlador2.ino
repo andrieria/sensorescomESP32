@@ -12,9 +12,9 @@ DHT dht(DHTPIN, DHTTYPE);
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(2);  // Cria uma instância de HardwareSerial para o GPS (Serial2)
 
-const char* ssid = "andrieriawifi";
-const char* password = "dridrigata";
-const char* serverName = "http://192.168.4.251:5000";
+const char* ssid = "Dantas_5G";
+const char* password = "andri6403";
+const char* serverName = "http://192.168.1.9:5000";
 
 void setup() {
   // Inicializa a porta serial do GPS

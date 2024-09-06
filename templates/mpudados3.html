@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo 3D</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawCube(vertices, edges) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            edges.forEach(([start, end]) => {
+                const [x1, y1] = vertices[start];
+                const [x2, y2] = vertices[end];
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+            });
+            ctx.stroke();
+        }
+
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    drawCube(data.vertices, data.edges);
+                    requestAnimationFrame(fetchData);
+                });
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
