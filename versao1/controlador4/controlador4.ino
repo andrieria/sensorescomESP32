@@ -14,7 +14,7 @@ HardwareSerial gpsSerial(2);  // Cria uma instância de HardwareSerial para o GP
 
 const char* ssid = "CaravanaNet";
 const char* password = "caravana2024";
-const char* serverName = "http://192.168.132.251:5000";
+const char* serverName = "http://192.168.43.251:5000";
 IPAddress ip; 
 
 void setup() {
@@ -34,6 +34,8 @@ void loop() {
     http.begin(serverName);
     String ssid = WiFi.SSID();
     ip = WiFi.localIP();
+    char ipStr[16];
+    sprintf(ipStr, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
     long rssi = WiFi.RSSI();
 
     float h = dht.readHumidity();
@@ -83,7 +85,7 @@ void loop() {
                              "&satelites=" + satelites +
                              "&precisao=" + precisao +
                              "&ssid=" + ssid + 
-                             "&ip=" + String(ip, 15) +
+                             "&ip=" + String(ipStr) +
                              "&rssi=" + String(rssi, 4);
 
     // Enviar a requisição
